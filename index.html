@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Modern Programming for Data Analytics - TITLE HERE</title>
+		<title>Modern Programming for Data Analytics - Testing and Continuous Integration</title>
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
@@ -21,8 +21,436 @@
 		<div class="reveal">
                   <div class="slides">
 		    <section id="titleSlide">
-			<h2> Modern Programming for Data Analytics - TITLE HERE </h2>
+			<h2>Modern Programming for Data Analytics - Testing and Continuous Integration</h2>
 		    </section>
+				<section>
+					<section>
+						<h3>Why do we do testing?</h3>
+						<ul class="r-fit-text">
+							<li> Scientific software development can become quite complex, with multiple moving parts where
+								one error somewhere can have global effect on the outcomes.
+							<li> Multiple people working on the same code can cause errors is a team member introduces a bug
+							<li> Bugs will happen, they are enivitable, the key is being able to find them quickly and how they effect the outcomnes
+						</ul>
+					</section>
+					<section>
+						<h3>Why do we do testing?</h3>
+						<ul class="r-fit-text">
+							<li> Building testing into your software develop process can make it easier to find bugs as
+								   they develop and prevent them from making it to users
+							<li> Testing can give you the confidence that the answers your code is getting are correct
+							<li> Testing can save far more time in the long-run than having to chase down difficult bugs
+						</ul>
+					</section>
+					<section>
+						<h3>Types of Testing </h3>
+						<ul class="r-fit-text">
+							<li> <b>Unit Testing </b> - Testing individual components of the software
+							<li> <b>Functional Testing</b> - Testing individual features of the software
+							<li> <b>End-to-End Testing</b> - Testing the use through all the functionality of the software
+								  (including users interacting with the software)
+							<li> <b>Integration Testing</b> - Testing how the software interacts with other external systems and services.
+							<li> <b>Acceptance Testing</b> - Formal requirements for declaring a process completed
+							<li> <b>Performance Testing</b> - Testing the time to solution for the software
+						</ul>
+					</section>
+					<section>
+						<h3>Types of Testing </h3>
+						<ul>
+							<li><b>Manual Testing</b> - Tests that requires human interaction to complete
+							<li><b>Automatic Testing</b> - Using some form of infrastructure to run testing / verification
+							<li><b>Interactive Testing</b> - Bug fixing and developing
+					 	</ul>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3> Unit Testing </h3>
+						<ul class="r-fit-text">
+							<li>As codes get highly complex, it becomes important to know that individual components give
+								  expected results.
+							<li>Unit testing involves creating a test for each of these individual components
+							<li>Unit testing is not a garuntee that the components work well together, but it does ensure that
+								  if you expect something to give a result, you get that.
+							<li>Basically, it involves giving a component a set of known inputs that have expected outputs that
+								  test all of the expected functionality of the component.
+							<li>In Python, unit testing can be done over an entire module, an individual function or a class.
+						</ul>
+					</section>
+					<section>
+						<h3>Unit Testing</h3>
+						<ul class="r-fit-text">
+							<li>Mocking - creating a "fake" version of an external or internal service that can stand in for the real one
+								<ul>
+									<li> For example - if function needs a class or object, a "fake" complete object can be created as a stand-in
+										for testing
+								</ul>
+							<li> Stubbing - stubbing only replicates the behavior of parts of an object, not using the actual object
+								 <ul>
+									 <li> For example - if I have a member of a class that requires a string, but the string is intended to come
+										 from another object in the program, I could test the base functionality by just creating a string
+								 </ul>
+							</ul>
+					</section>
+					<section>
+						<h3>Basic Steps of a Unit Test</h3>
+						<ul class="r-fit-text">
+							<li>Setup - create the data needed for the test
+							<li>Exercise - execute the functionality on the data
+							<li>Verify - perform a test (usually an assertion) to verify the answer is expected
+							<li>Teardown - Clean up all data so that the test remains independent
+						</ul>
+					</section>
+					<section>
+						<h3>High-level example</h3>
+						<p class="r-fit-text"> Let's say I have a class <b>foo</b> that relies on processing a collection units of class <b>bar</b><br>
+							To create a unit test for function <b>foo</b>, the steps would be conceptually: </p>
+						<ul class="r-fit-text">
+							<li> Generate a mock set of <b>bar</b> instances
+							<li> Run the members of <b>foo</b> using the mock instances of <b>bar</b>
+							<li> Pass through a series of assertions that the answer is the expected answer
+							<li> Destroy the mock set of <b>bar</b> instances
+						</ul>
+					</section>
+					<section>
+						<pre class="python stretch" ><code data-line-numbers="2-10|13-33">
+def add_x_and_k(x, k):
+    if isinstance(x, str):
+        return x + str(k)
+    elif isinstance(x, int):
+        return x + int(k)
+    elif isinstance(x, float):
+        return x + float(k)
+    else:
+        return "this would be an error"
+
+
+if __name__ == "__main__":
+    ### Unit testing for module
+
+    pass_flag = True
+    if add_x_and_k("x", "0.001") != "x0.001":
+        print("string failed")
+        pass_flag = False
+    if add_x_and_k(1, 1.022) != 2:
+        print("int failed")
+        pass_flag = False
+    if add_x_and_k(1.01, 2.01) != 1.01 + 2.01:
+        print("float failed")
+        pass_flag = False
+    if add_x_and_k(True, 1.020) != "this would be an error":
+        print("error failed")
+        pass_flag = False
+
+    if pass_flag:
+        print("All Tests Passed")
+    else:
+        print("Some Tests Failed")
+
+						</code></pre>
+					</section>
+				<section>
+					<h4> <a href="https://docs.python.org/3/library/unittest.htmlunittest" target="_blank">
+						unittest</a> - a simple unittesting library for Python </h4>
+					<small>
+					<pre class="python stretch"><code data-line-numbers="2-17|20-31">
+import unittest
+
+class T:
+    def __init__(self):
+        self.x = 1.000
+
+
+def add_x_and_k(x, k):
+    if isinstance(x, str):
+        return x + str(k)
+    elif isinstance(x, int):
+        return x + int(k)
+    elif isinstance(x, float):
+        return x + float(k)
+    else:
+        return "this would be an error"
+
+
+class TestAddXAndK(unittest.TestCase):
+    def test_add(self):
+        self.assertEqual(add_x_and_k("x", "0.001"), "x0.001")
+        self.assertEqual(add_x_and_k(1, 1.022), 2)
+        self.assertAlmostEqual(add_x_and_k(1.01, 2.01), 3.02)
+        self.assertEqual(add_x_and_k(True, 0.01), "this would be an error")
+        y = T()
+        self.assertEqual(add_x_and_k(y, 0.001), "this would be an error")
+
+
+if __name__ == "__main__":
+    unittest.main()
+						</code></pre>
+					</small>
+					</section>
+					<section>
+						<pre class="bash stretch"><code>
+$ python -m unittest unit_test.py
+======================================================================
+FAIL: test_add (unit_test.TestAddXAndK)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/Users/shawn/Programs/ms-das/TestingAndContinuousIntegration/static/scripts/unit_test.py", line 25, in test_add
+    self.assertEqual(add_x_and_k(True, 0.01), "this would be an error")
+AssertionError: 1 != 'this would be an error'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.004s
+
+
+FAILED (failures=1)
+					</code></pre>
+				</section>
+				<section>
+					<img src="static/images/unittest_functions.png">
+					<p class="r-fit-text">For more information and a tutorial, see
+						<a href="https://www.datacamp.com/community/tutorials/unit-testing-python" target="_blank">
+							https://www.datacamp.com/community/tutorials/unit-testing-python</a>
+				</section>
+			</section>
+				<section>
+					<section>
+						<h3><a href="https://docs.pytest.org/en/6.2.x/" target="_blank">
+							Pytest</a> - a framework for unit testing in Python</h3>
+						<ul class="r-fit-text">
+							<li> provides a complete unit testing framework for complex programs and resources
+							<li> allows the definition of complex inputs for unit testing
+							<li> can be easily integrated with most software frameworks
+						</ul>
+					</section>
+					<section>
+						<h3> Simple Pytest example </h3>
+						<pre class = "python stretch"><code data-line-numbers="2-18|21-35|37-43">
+	from unit_test import *
+
+
+	def test_add_x_and_k_string():
+	    """
+	    Verifies string output
+	    """
+
+	    assert add_x_and_k("x", "0.001") == "x0.001"
+
+
+	def test_add_x_and_k_int():
+	    """
+	    Verifies integer output
+	    """
+
+	    assert add_x_and_k(1,  1.022) == 2
+
+
+	def test_add_x_and_k_float():
+	    """
+	    Verifies float output
+	    """
+
+	    assert round(add_x_and_k(1.01, 2.01), 2) == 3.02
+
+
+	def test_add_x_and_k_bool():
+	    """
+	    Verifies that this should fail with a boolean
+	    """
+
+	    assert add_x_and_k(True, 0.001) == "this would be an error"
+
+
+	def test_add_x_and_k_error():
+	    """
+	    Verifies that this should fail with an error
+	    """
+
+	    t = T()
+	    assert add_x_and_k(t, 0.001) == "this would be an error"
+						</code></pre>
+					</section>
+					<section>
+						<h3> Simple Pytest example </h3>
+						<small>
+						<pre class = "bash stretch"><code>
+=================================================== test session starts ===================================================
+platform linux -- Python 3.8.10, pytest-6.2.5, py-1.10.0, pluggy-1.0.0
+rootdir: /mnt/c/Users/shawn/Programs/ms-das/unit_testing_examples
+collected 5 items
+
+test_unit_test.py ...F.                                                                                              [100%]
+
+======================================================== FAILURES =========================================================
+__________________________________________________ test_add_x_and_k_bool __________________________________________________
+    def test_add_x_and_k_bool():
+        """
+        Verifies that this should fail with a boolean
+        """
+
+>       assert add_x_and_k(True, 0.001) == "this would be an error"
+E       AssertionError: assert 1 == 'this would be an error'
+E        +  where 1 = add_x_and_k(True, 0.001)
+
+test_unit_test.py:33: AssertionError
+================================================= short test summary info =================================================
+FAILED test_unit_test.py::test_add_x_and_k_bool - AssertionError: assert 1 == 'this would be an error'
+=============================================== 1 failed, 4 passed in 1.50s ===============================================
+							</code></pre>
+						</small>
+						</section>
+						<section>
+						<h3>pytest - Fixtures</h3>
+						<ul class="r-fit-text">
+							<li>Fixtures allow you to define reusable mock and stub objects for use in testing
+							<li>Can define objects, services, inputs, etc..
+							<li>Remove to the need to create mock objects for every test
+							<li>Allow one to define the scope of the object, and the setup and teardown procedures
+						</ul>
+					</section>
+					<section>
+						<h3>pytest - Fixtures</h3>
+						<p> A word about directory structure</p>
+						<pre class="bash"><code>
+.
+├── LICENSE
+├── README.md
+├── SCF.py
+├── main.py
+├── mol.py
+├── requirements.txt
+└── tests
+    ├── SCF
+    │   ├── __init__.py
+    │   └── test_SCF.py
+    ├── __init__.py
+    └── conftest.py
+						</code></pre>
+					</section>
+					<section>
+						<h3>pytest - fixtures</h3>
+						<p><b>conftest.py</b> is where we define fixtures</p>
+						<pre class="python stretch"><code>
+"""
+The PyTest Configuration code
+"""
+import pytest
+from mol import mol
+
+@pytest.fixture
+def mol_h2o():
+    """
+    Fixture that creates a specific water molecule
+    """
+    atom = "8 0.000000000000  -0.143225816552   0.000000000000;" \
+        + "1 1.638036840407   1.136548822547  -0.000000000000;" \
+        + "1 -1.638036840407   1.136548822547  -0.000000000000"
+
+    return mol(atom, 7, 5, 7)
+						</code></pre>
+					</section>
+					<section>
+						<h3>pytest - Fixtures</h3>
+						<p>A more complext example <a href="https://github.com/shots47s/conp-portal/blob/master/tests/conftest.py" target="_blank">
+							https://github.com/shots47s/conp-portal/blob/master/tests/conftest.py</a></p>
+					</section>
+					<section>
+						<h3>pyttest - testing a function</h3>
+						<pre class="python stetch"><code>
+import pytest
+import SCF
+def test_calc_nuclear_repulsion_energy(mol_h2o):
+		"""
+		Tests that the nuclear repulsion energy is correct
+		"""
+    assert SCF.calc_nuclear_repulsion_energy(mol_h2o) == 8.00236706181077,\
+        "Nuclear Repulsion Energy Test (H2O) Failed"
+
+def test_calc_initial_density(mol_h2o):
+    """
+    Tests that the initial density returns a zero matrix
+    and tests dimensions
+    """
+
+    Duv = SCF.calc_initial_density(mol_h2o)
+    assert Duv.sum() == 0.0
+    assert Duv.shape == (mol_h2o.nao, mol_h2o.nao)
+					</code></pre>
+				</section>
+				<section>
+					<h3>pytest - Running the tests</h3>
+					<small><pre class="bash stretch" style="width:100%;"><code>
+	$pytest
+	================================== test session starts ==================================
+	platform linux -- Python 3.7.6, pytest-6.2.5, py-1.10.0, pluggy-1.0.0
+	rootdir: /mnt/c/Users/shawn/Programs/ms-das/HF_SCF_Assignment
+	plugins: cov-2.12.1
+	collected 2 items
+
+	tests/SCF/test_SCF.py F.                                                           [100%]
+
+	======================================= FAILURES ========================================
+	________________________________ test_calc_nuclear_repulsion_energy _____________________
+	mol_h2o = &lt;mol.mol object at 0x7eff07b6d250&gt;
+
+	    def test_calc_nuclear_repulsion_energy(mol_h2o):
+	        assert True
+	&gt;       assert SCF.calc_nuclear_repulsion_energy(mol_h2o) == 8.00236706181077,\
+	            &quot;Nuclear Repulsion Energy Test (H2O) Failed&quot;
+	E       AssertionError: Nuclear Repulsion Energy Test (H2O) Failed
+	E       assert 0 == 8.00236706181077
+	E        +  where 0 = &lt;function calc_nuclear_repulsion_energy at 0x7eff0a32ab00&gt; (&lt;mol.mol object at 0x7eff07b6d250&gt;)
+	E        +    where &lt;function calc_nuclear_repulsion_energy at 0x7eff0a32ab00&gt;
+	                      = SCF.calc_nuclear_repulsion_energy
+
+	tests/SCF/test_SCF.py:7: AssertionError
+	--------------------------------- Captured stdout setup --------------------------------
+	================================ short test summary info ===============================
+	FAILED tests/SCF/test_SCF.py::test_calc_nuclear_repulsion_energy - AssertionError:
+	       Nuclear Repulsion Energy Test...
+	============================== 1 failed, 1 passed in 2.00s =============================
+					</code></pre></small>
+				</section>
+			</section>
+			<section>
+				<section>
+					<h3>Continuous Integration, Deployment and Testing</h3>
+					<ul class="r-fit-text">
+						<li>CI/CD is essentially the process of automatically deploying or integrating software based
+							on an event (e.g. pull requests, version release, manual triggering,...)
+						<li>This process can also be used for testing to ensure that changes to a platform do not
+							 break the whole system and do not pollute the source code.
+						<li>There are many systems for doing this:
+							<ul>
+								<li><a href="https://www.jenkins.io/" target="_blank">Jenkins</a> - the leading open source CI platform,
+									it is a completely self-contained Java-based solution
+								<li><a href="https://circleci.com/" target="_blank">CircleCI</a> - cloud based CI platform, strong integration
+									 with GitHub and Bitbucket
+							 	 <li><a href="https://www.travis-ci.com/" target="_blank">TravisCI</a> virtuall the same as CicleCI in features,
+									 cloud based solution with strong intergration to GitHub and Bitbucket
+							</ul>
+					</section>
+					<section>
+						<h3>Using TravisCI with Pytest </h3>
+						<p> adding a .travic.yml to your repository </p>
+						<pre class="yaml stretch"><code>
+language: python
+
+python:
+- 3.7
+
+install:
+- pip install -r requirements.txt
+- pip install coveralls
+
+script:
+- pycodestyle --max-line-length=99 -r *.py
+- pytest --cov ../HF_SCF_Assignment
+
+after_success:
+- coveralls
+						</code></pre>
+					</section>
+				</section>
 		  </div>
 		</div>
 
@@ -38,6 +466,7 @@
 			// - https://revealjs.com/config/
 			Reveal.initialize({
 				hash: true,
+				margin: 0.1,
 				dependencies: [
 					{src: 'plugin/title-footer/title-footer.js', async: true, callback: function() { title_footer.initialize(); }},
 				],
